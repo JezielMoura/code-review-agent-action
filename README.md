@@ -1,4 +1,4 @@
-# AI Review Action
+# Code review action
 
 GitHub Action that reviews pull requests using **any endpoint compatible with the OpenAI chat completions API** (OpenCode, OpenAI, vLLM, Ollama, etc.).
 

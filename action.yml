@@ -1,4 +1,4 @@
-name: 'AI Review Action'
+name: 'Code Review Action'
 description: 'Revisa PRs usando qualquer endpoint compatível com a API de chat completions da OpenAI'
 author: 'proweb'
 
