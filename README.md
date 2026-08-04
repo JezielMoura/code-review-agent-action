@@ -38,7 +38,7 @@ The model provider is configured inside the action: it registers an OpenAI-compa
 | `openai-api-url` | ✅ | — | Base URL compatible with the OpenAI chat completions API (e.g. `https://api.openai.com/v1`). |
 | `openai-api-key` | ✅ | — | Authentication token for the endpoint. |
 | `model` | ✅ | — | Model name (e.g. `gpt-4o-mini`). |
-| `file-patterns` | ❌ | `**/*.cs,**/*.ts,**/*.tsx,**/*.html,**/*.css,*.json,*.md` | Glob patterns (comma-separated). Prefix a pattern with `!` to exclude (e.g. `**/*.ts,!**/*.spec.ts`). |
+| `file-patterns` | ❌ | `**/*.py,**/*.js,**/*.jsx,**/*.mjs,**/*.cjs,**/*.ts,**/*.tsx,**/*.cs,**/*.java,**/*.c,**/*.h,**/*.cpp,**/*.cc,**/*.hpp,**/*.go,**/*.rs,**/*.kt,**/*.kts,**/*.swift,**/*.php,**/*.rb,**/*.html,**/*.css,**/*.scss,**/*.vue,**/*.svelte,**/*.sql,**/*.sh,**/*.yaml,**/*.yml,**/*.toml,**/*.json,**/*.md` | Glob patterns (comma-separated). Prefix a pattern with `!` to exclude (e.g. `**/*.ts,!**/*.spec.ts`). |
 | `max-diff-size` | ❌ | `60000` | Maximum size (in characters) of the diff sent to the model. |
 
 ## Prerequisites
