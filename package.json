@@ -1,0 +1,22 @@
+{
+  "name": "code-review-action",
+  "version": "1.0.0",
+  "description": "GitHub Action that reviews pull requests with LLMs via any OpenAI chat completions API-compatible endpoint",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "^0.83.0",
+    "@flue/cli": "^2.0.1",
+    "@flue/runtime": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "vitest": "^4.1.10"
+  }
+}
