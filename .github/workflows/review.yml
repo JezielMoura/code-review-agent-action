@@ -1,0 +1,23 @@
+name: Code Review
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: code-review-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: https://codeberg.org/jezielmoura/code-review-action@v1
+        with:
+          repo-api-url: ${{ secrets.REPO_API_URL }}
+          repo-api-token: ${{ secrets.REPO_API_TOKEN }}
+          openai-api-url: ${{ secrets.OPENAI_API_URL }}
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          model: deepseek-v4-flash
