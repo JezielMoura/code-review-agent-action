@@ -55,6 +55,11 @@ describe('matchesPatternList (negação)', () => {
     expect(matchesPatternList('src/generated/models.ts', ['**/*.ts', '!src/generated/**'])).toBe(false);
     expect(matchesPatternList('src/hand/models.ts', ['**/*.ts', '!src/generated/**'])).toBe(true);
   });
+
+  it('suporta negação junto de expansão de chaves', () => {
+    expect(matchesPatternList('src/App.tsx', ['**/*.{ts,tsx}', '!**/*.test.tsx'])).toBe(true);
+    expect(matchesPatternList('src/App.test.tsx', ['**/*.{ts,tsx}', '!**/*.test.tsx'])).toBe(false);
+  });
 });
 
 describe('filterDiffByPatterns', () => {
