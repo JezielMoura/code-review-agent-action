@@ -42,7 +42,7 @@ async function gitPrDiff(): Promise<string> {
   const workspace = getWorkspacePath();
   const baseRef = requireEnv('BASE_REF');
 
-  console.log(`comparing PR changes against: ${baseRef}...HEAD`);
+  console.log(`comparing PR changes against: ${baseRef}..HEAD`);
 
   try {
     const { stdout } = await execFileAsync('git', [
@@ -50,7 +50,7 @@ async function gitPrDiff(): Promise<string> {
       '--no-color',
       '--no-ext-diff',
       '--find-renames',
-      `${baseRef}...HEAD`,
+      `${baseRef}..HEAD`,
     ], {
       cwd: workspace,
       encoding: 'utf8',
@@ -60,7 +60,7 @@ async function gitPrDiff(): Promise<string> {
   } catch (err) {
     const stderr = (err as { stderr?: unknown }).stderr?.toString() ?? '';
     const detail = stderr.trim() ? `: ${stderr.trim()}` : '';
-    throw new Error(`git diff failed in "${workspace}" (${baseRef}...HEAD)${detail}`);
+    throw new Error(`git diff failed in "${workspace}" (${baseRef}..HEAD)${detail}`);
   }
 }
 
