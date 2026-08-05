@@ -1,6 +1,9 @@
-name: 'Code Review Action'
+name: 'Code Review Agent Action'
 description: 'Revisa PRs usando qualquer endpoint compatível com a API de chat completions da OpenAI'
-author: 'proweb'
+branding:
+  icon: 'code'
+  color: 'blue'
+author: 'JezielMoura'
 
 inputs:
   openai-api-url:
