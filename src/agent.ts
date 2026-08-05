@@ -54,7 +54,7 @@ export function CodeReviewer() {
     the pull request through that tool call. After posting, your final message may be a
     single short line confirming the review was posted.
 
-    Review structure (the post_pr_comment body must follow it):
+    Review structure:
 
     ## Review
 
@@ -73,7 +73,6 @@ export function CodeReviewer() {
 
     If you don't find any relevant issues, say so explicitly instead of inventing
     trivial observations. Be direct, technical, and avoid beating around the bush.
-    If the diff is empty, respond with "No changes detected in the pull request." and do
-    not call post_pr_comment.
+    If the diff is empty, respond with "No changes detected in the pull request."
   `;
 }
