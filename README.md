@@ -19,7 +19,7 @@ jobs:
       contents: read
       issues: write
     steps:
-      - uses: https://codeberg.org/jezielmoura/code-review-action@v1
+      - uses: https://github.com/JezielMoura/code-review-agent-action@v1
         with:
           openai-api-url: ${{ secrets.OPENAI_API_URL }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
