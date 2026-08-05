@@ -5,7 +5,7 @@ import { local } from '@flue/runtime/node';
 import { requireEnv } from "./utils/env-utils.ts";
 import { getWorkspacePath } from './utils/workspace-utils.ts';
 import { getPrDiff } from './tools/get-pr-diff.ts';
-import { postPrComment } from './tools/post-pr-comment.ts';
+import { postReview } from './tools/post-review.ts';
 
 const PROVIDER_ID = 'openai-compatible';
 const modelId = requireEnv('MODEL');
@@ -36,7 +36,7 @@ setProvider(
 export function CodeReviewer() {
   useModel(`${PROVIDER_ID}/${modelId}`);
   useTool(getPrDiff);
-  useTool(postPrComment);
+  useTool(postReview);
   useSandbox(local({ cwd: getWorkspacePath() }));
 	return `
     You are a senior code reviewer specialist.
@@ -48,8 +48,8 @@ export function CodeReviewer() {
 
     If the provided diff has content, produce an objective review in Markdown, in English.
 
-    The review must be delivered by calling the post_pr_comment tool with the full review
-    as its body argument. This is mandatory: your last action must be a post_pr_comment
+    The review must be delivered by calling the post_review tool with the full review
+    as its body argument. This is mandatory: your last action must be a post_review
     call. Do not output the review as your final message — the comment is only posted on
     the pull request through that tool call. After posting, your final message may be a
     single short line confirming the review was posted.
