@@ -26,9 +26,11 @@ export async function loadFilteredDiff(prNumber: number): Promise<string> {
     return '';
   }
 
+  console.log(`diff size: ${filteredDiff.length} chars`);
+
   const maxDiffSize = parseMaxDiffSize();
   const truncatedDiff = filteredDiff.length > maxDiffSize
-    ? `${filteredDiff.slice(0, maxDiffSize)}\n\n[diff truncado por limite de tamanho: ${maxDiffSize} caracteres]`
+    ? `${filteredDiff.slice(0, maxDiffSize)}\n\n[diff truncated at size limit: ${maxDiffSize} characters]`
     : filteredDiff;
 
   diffCache.set(prNumber, truncatedDiff);
