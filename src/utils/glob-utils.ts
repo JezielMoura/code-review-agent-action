@@ -26,7 +26,6 @@ function splitDiffByFile(diff: string): DiffFileBlock[] {
     if (line.startsWith('diff --git ')) {
       pushBlock();
       current = [line];
-      // Fallback for blocks without ---/+++ headers (binary files, pure renames).
       currentPath = parseDiffGitPath(line);
       inHunk = false;
     } else {
@@ -45,13 +44,6 @@ function splitDiffByFile(diff: string): DiffFileBlock[] {
   return blocks;
 }
 
-/**
- * Extract the changed path from a `---`/`+++` header line, which is the
- * authoritative source for the file path (the `diff --git` line can be
- * ambiguous for paths containing spaces or ` b/`). Handles git's C-style
- * quoting of unusual paths (e.g. non-ASCII names) and the trailing tab git
- * appends to paths containing spaces.
- */
 function parseHeaderPath(line: string): string {
   const trimmed = line.replace(/\t$/, '');
   if (trimmed.startsWith('+++ ')) {
@@ -72,17 +64,12 @@ function stripSidePrefix(path: string, side: 'a' | 'b'): string {
   return unquoteGitPath(inner.slice(side.length + 1));
 }
 
-/**
- * Parse the b/ (new) path from a `diff --git` line, anchoring at the end of
- * the line so paths containing ` b/` or spaces parse correctly.
- */
 function parseDiffGitPath(line: string): string {
   const match = line.match(/^diff --git (.*) (?:\")?b\/(.+?)(?:\")?$/);
   if (!match) return '';
   return unquoteGitPath(match[2]);
 }
 
-/** Unescape git's C-style path quoting (octal bytes, \\n, \\t, \\" etc.). */
 function unquoteGitPath(path: string): string {
   if (!path.includes('\\')) return path;
   const bytes: number[] = [];
@@ -207,12 +194,6 @@ export function matchesAnyGlob(path: string, patterns: string[]): boolean {
   );
 }
 
-/**
- * Match a path against a list of glob patterns supporting negation:
- * a pattern prefixed with `!` excludes files, otherwise at least one
- * positive pattern must match. A list made only of negations matches
- * nothing (there is nothing to include).
- */
 export function matchesPatternList(path: string, patterns: string[]): boolean {
   const includes: string[] = [];
   const excludes: string[] = [];

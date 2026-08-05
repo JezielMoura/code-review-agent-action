@@ -42,6 +42,8 @@ async function gitPrDiff(): Promise<string> {
   const workspace = getWorkspacePath();
   const baseRef = requireEnv('BASE_REF');
 
+  console.log(`comparing PR changes against: ${baseRef}...HEAD`);
+
   try {
     const { stdout } = await execFileAsync('git', [
       'diff',

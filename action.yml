@@ -1,5 +1,5 @@
 name: 'Code Review Agent Action'
-description: 'Revisa PRs usando qualquer endpoint compatível com a API de chat completions da OpenAI'
+description: 'Reviews PRs using any endpoint compatible with the OpenAI chat completions API'
 branding:
   icon: 'code'
   color: 'blue'
@@ -7,53 +7,53 @@ author: 'JezielMoura'
 
 inputs:
   openai-api-url:
-    description: 'URL base compatível com a API de chat completions da OpenAI (ex: https://api.openai.com/v1 ou https://opencode.exemplo.com/v1)'
+    description: 'Base URL compatible with the OpenAI chat completions API (e.g. https://api.openai.com/v1 or https://opencode.example.com/v1)'
     required: true
   openai-api-key:
-    description: 'Token de autenticação do endpoint (ex: sk-...)'
+    description: 'Authentication token for the endpoint (e.g. sk-...)'
     required: true
   model:
-    description: 'Nome do modelo a ser usado na chamada (ex: gpt-4o-mini)'
+    description: 'Name of the model to use in the call (e.g. gpt-4o-mini)'
     required: true
   repo-api-url:
-    description: 'URL base da API do repositório, usada para postar o comentário do review (ex: https://api.github.com ou https://forge.exemplo.com/api/v1)'
+    description: 'Base URL of the repository API, used to post the review comment (e.g. https://api.github.com or https://forge.example.com/api/v1)'
     required: false
     default: 'https://api.github.com'
   repo-api-token:
-    description: 'Token com permissão de escrita no repositório (para postar o comentário do review). Padrão: github.token no GitHub.'
+    description: 'Token with write permission on the repository (to post the review comment). Default: github.token on GitHub.'
     required: false
   repo-api-kind:
-    description: 'Tipo da API do repositório: github (padrão) ou forgejo'
+    description: 'Repository API type: github (default) or forgejo'
     required: false
     default: 'github'
   base-ref:
-    description: 'Ref local (ou commit) da branch base usado pelo git diff para calcular o diff do PR (ex: origin/main). Padrão: origin/<branch base do pull request>.'
+    description: 'Local ref (or commit) of the base branch used by git diff to compute the PR diff (e.g. origin/main). Default: origin/<pull request base branch>.'
     required: false
   file-patterns:
-    description: 'Padrões glob (separados por vírgula) dos arquivos a revisar. Prefixe um padrão com ! para excluir (ex: **/*.ts,!**/*.spec.ts)'
+    description: 'Comma-separated glob patterns of files to review. Prefix a pattern with ! to exclude (e.g. **/*.ts,!**/*.spec.ts)'
     required: false
     default: '**/*.py,**/*.js,**/*.jsx,**/*.mjs,**/*.cjs,**/*.ts,**/*.tsx,**/*.cs,**/*.java,**/*.c,**/*.h,**/*.cpp,**/*.cc,**/*.hpp,**/*.go,**/*.rs,**/*.kt,**/*.kts,**/*.swift,**/*.php,**/*.rb,**/*.html,**/*.css,**/*.scss,**/*.vue,**/*.svelte,**/*.sql,**/*.sh,**/*.yaml,**/*.yml,**/*.toml,**/*.json,**/*.md'
   max-diff-size:
-    description: 'Tamanho máximo (em caracteres) do diff enviado ao LLM'
+    description: 'Maximum size (in characters) of the diff sent to the LLM'
     required: false
     default: '300000'
 
 runs:
   using: 'composite'
   steps:
-    - name: Checkout do código fonte (head do PR)
+    - name: Checkout source code (PR head)
       if: github.event_name == 'pull_request'
       uses: actions/checkout@v7
       with:
         ref: ${{ github.event.pull_request.head.sha }}
         fetch-depth: 0
 
-    - name: Instalar dependências (prod apenas)
+    - name: Install dependencies (prod only)
       shell: bash
       working-directory: ${{ github.action_path }}
       run: npm ci --omit=dev --no-audit --no-fund --loglevel=error
 
-    - name: Executar review
+    - name: Run review
       id: review
       if: github.event_name == 'pull_request'
       shell: bash
