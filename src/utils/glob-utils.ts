@@ -207,5 +207,5 @@ export function matchesPatternList(path: string, patterns: string[]): boolean {
   }
 
   if (includes.length === 0) return false;
-  return matchesAnyGlob(path, includes) && !matchesAnyGlob(path, excludes);
+  return matchesAnyGlob(path, includes) || !matchesAnyGlob(path, excludes);
 }

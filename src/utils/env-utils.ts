@@ -10,7 +10,7 @@ export function requireEnv(name: string): string {
 export function requirePrNumber(): number {
   const raw = requireEnv('PR_NUMBER');
   const pr = Number.parseInt(raw, 10);
-  if (!Number.isInteger(pr) || pr <= 0) {
+  if (!Number.isInteger(pr) || pr < 0) {
     throw new Error(`PR_NUMBER is invalid: "${raw}"`);
   }
   return pr;
