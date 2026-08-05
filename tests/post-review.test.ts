@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { postPrComment } from '../src/tools/post-pr-comment.ts';
+import { postReview } from '../src/tools/post-review.ts';
 
 function jsonResponse(body: string, ok = true, status = 200): Response {
   return { ok, status, text: async () => body } as unknown as Response;
@@ -11,7 +11,7 @@ const runContext = {
   log: console,
 };
 
-describe('postPrComment tool', () => {
+describe('postReview tool', () => {
   beforeEach(() => {
     vi.stubEnv('REPO_API_URL', 'https://forge.example/api/v1');
     vi.stubEnv('REPO_API_TOKEN', 'token123');
@@ -28,7 +28,7 @@ describe('postPrComment tool', () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(''));
     vi.stubGlobal('fetch', fetchMock);
 
-    const result = await postPrComment.run({
+    const result = await postReview.run({
       ...runContext,
       data: { body: '# Review\nLooks good.' },
     } as never);
@@ -52,7 +52,7 @@ describe('postPrComment tool', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse('nope', false, 500)));
 
     await expect(
-      postPrComment.run({ ...runContext, data: { body: 'x' } } as never),
+      postReview.run({ ...runContext, data: { body: 'x' } } as never),
     ).rejects.toThrow(/500/);
   });
 });
