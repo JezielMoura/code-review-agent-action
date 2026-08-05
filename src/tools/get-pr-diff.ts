@@ -1,7 +1,12 @@
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { defineTool } from '@flue/runtime';
 import { filterDiffByPatterns } from '../utils/glob-utils.ts';
 import { requireEnv, requirePrNumber } from "../utils/env-utils.ts";
-import { sendRequest } from "../utils/fetch-utils.ts";
+import { getWorkspacePath } from '../utils/workspace-utils.ts';
+
+const execFileAsync = promisify(execFile);
+const MAX_GIT_BUFFER = 64 * 1024 * 1024;
 
 const diffCache = new Map<number, string>();
 
@@ -14,11 +19,7 @@ export async function loadFilteredDiff(prNumber: number): Promise<string> {
     .map((p) => p.trim())
     .filter(Boolean);
 
-  const rawDiff = repoApiKind() === 'github'
-    ? await sendRequest(`pulls/${prNumber}`, {
-        headers: { Accept: 'application/vnd.github.v3.diff' },
-      })
-    : await sendRequest(`pulls/${prNumber}.diff`);
+  const rawDiff = await gitPrDiff();
   const filteredDiff = filterDiffByPatterns(rawDiff, filePatterns);
 
   if (!filteredDiff.trim()) {
@@ -37,12 +38,28 @@ export async function loadFilteredDiff(prNumber: number): Promise<string> {
   return truncatedDiff;
 }
 
-function repoApiKind(): 'github' | 'forgejo' {
-  const kind = process.env.REPO_API_KIND ?? 'github';
-  if (kind !== 'github' && kind !== 'forgejo') {
-    throw new Error(`REPO_API_KIND inválido: "${kind}" (esperado "github" ou "forgejo")`);
+async function gitPrDiff(): Promise<string> {
+  const workspace = getWorkspacePath();
+  const baseRef = requireEnv('BASE_REF');
+
+  try {
+    const { stdout } = await execFileAsync('git', [
+      'diff',
+      '--no-color',
+      '--no-ext-diff',
+      '--find-renames',
+      `${baseRef}...HEAD`,
+    ], {
+      cwd: workspace,
+      encoding: 'utf8',
+      maxBuffer: MAX_GIT_BUFFER,
+    });
+    return stdout;
+  } catch (err) {
+    const stderr = (err as { stderr?: unknown }).stderr?.toString() ?? '';
+    const detail = stderr.trim() ? `: ${stderr.trim()}` : '';
+    throw new Error(`git diff falhou em "${workspace}" (${baseRef}...HEAD)${detail}`);
   }
-  return kind;
 }
 
 function parseMaxDiffSize(): number {
