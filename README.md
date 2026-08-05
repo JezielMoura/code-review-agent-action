@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
+      pull-requests: write
     steps:
       - uses: JezielMoura/code-review-agent-action@v1
         with:
@@ -28,8 +28,8 @@ jobs:
 
 On GitHub nothing else is needed: `repo-api-url` defaults to `https://api.github.com` and `repo-api-token` defaults to `${{ github.token }}`. The `permissions` block above is important:
 
-- The review is posted via `issues/{n}/comments`, which requires the **`issues: write`** permission — `pull-requests: write` alone is not enough for that endpoint. Without an explicit block, repositories/organizations with **restricted default token permissions** give the token read-only access and comment posting fails with 403.
-- **Fork pull requests**: on `pull_request` events from forks, the `GITHUB_TOKEN` is **read-only regardless of the `permissions` block** (GitHub does not grant write access to code from forks). To review fork contributions, pass a PAT with `issues: write` (or repo scope) via `repo-api-token`:
+- The review is posted as a comment on the pull request via the `issues/{n}/comments` endpoint, which requires the **`pull-requests: write`** permission. Without an explicit block, repositories/organizations with **restricted default token permissions** give the token read-only access and comment posting fails with 403.
+- **Fork pull requests**: on `pull_request` events from forks, the `GITHUB_TOKEN` is **read-only regardless of the `permissions` block** (GitHub does not grant write access to code from forks). To review fork contributions, pass a PAT with `pull-requests: write` (or repo scope) via `repo-api-token`:
 
 ```yaml
         with:
@@ -47,7 +47,7 @@ The model provider is configured inside the action: it registers an OpenAI-compa
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
 | `repo-api-url` | ❌ | `https://api.github.com` | Base URL of the repository API: `https://api.github.com` for GitHub, or the Forgejo API base (e.g. `https://forge.example.com/api/v1`). |
-| `repo-api-token` | ❌ | `${{ github.token }}` | Token with permission to read the PR diff and post comments (`issues: write`). On GitHub, the default works for same-repo PRs; fork PRs need a PAT (the `GITHUB_TOKEN` is read-only for forks). On Forgejo, pass a token with scopes `read:repository` + `write:issue`. |
+| `repo-api-token` | ❌ | `${{ github.token }}` | Token with permission to read the PR diff and post comments (`pull-requests: write`). On GitHub, the default works for same-repo PRs; fork PRs need a PAT (the `GITHUB_TOKEN` is read-only for forks). On Forgejo, pass a token with scopes `read:repository` + `write:issue`. |
 | `repo-api-kind` | ❌ | `github` | Repository API flavor: `github` (default) or `forgejo`. |
 | `openai-api-url` | ✅ | — | Base URL compatible with the OpenAI chat completions API (e.g. `https://api.openai.com/v1`). |
 | `openai-api-key` | ✅ | — | Authentication token for the endpoint. |
@@ -57,7 +57,7 @@ The model provider is configured inside the action: it registers an OpenAI-compa
 
 ## Prerequisites
 
-- **Repository token**: on GitHub, none needed for same-repo PRs — the built-in `${{ github.token }}` is the default, as long as the workflow grants `issues: write`. Fork PRs require a PAT (the `GITHUB_TOKEN` is read-only for `pull_request` events from forks). On Forgejo, create one at `Settings → Applications → Generate New Token` with repository read and comment write scope (e.g. `read:repository`, `write:issue`).
+- **Repository token**: on GitHub, none needed for same-repo PRs — the built-in `${{ github.token }}` is the default, as long as the workflow grants `pull-requests: write`. Fork PRs require a PAT (the `GITHUB_TOKEN` is read-only for `pull_request` events from forks). On Forgejo, create one at `Settings → Applications → Generate New Token` with repository read and comment write scope (e.g. `read:repository`, `write:issue`).
 - **Model endpoint**: the given URL must respond at `<base-url>/chat/completions` in the OpenAI API format (streaming).
 
 ## Behavior
