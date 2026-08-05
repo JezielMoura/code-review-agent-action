@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
+      pull-requests: write
     steps:
       - uses: JezielMoura/code-review-agent-action@v1
         with:
@@ -28,8 +28,8 @@ jobs:
 
 On GitHub nothing else is needed: `repo-api-url` defaults to `https://api.github.com` and `repo-api-token` defaults to `${{ github.token }}` — both are used **only to post the review comment** (the diff is read locally with `git`, no repository API access is involved). The `permissions` block above is important:
 
-- The review is posted via `issues/{n}/comments`, which requires the **`issues: write`** permission — `pull-requests: write` alone is not enough for that endpoint. Without an explicit block, repositories/organizations with **restricted default token permissions** give the token read-only access and comment posting fails with 403.
-- **Fork pull requests**: on `pull_request` events from forks, the `GITHUB_TOKEN` is **read-only regardless of the `permissions` block** (GitHub does not grant write access to code from forks). To review fork contributions, pass a PAT with `issues: write` (or repo scope) via `repo-api-token`:
+- The review is posted as a comment on the pull request via the `issues/{n}/comments` endpoint, which requires the **`pull-requests: write`** permission. Without an explicit block, repositories/organizations with **restricted default token permissions** give the token read-only access and comment posting fails with 403.
+- **Fork pull requests**: on `pull_request` events from forks, the `GITHUB_TOKEN` is **read-only regardless of the `permissions` block** (GitHub does not grant write access to code from forks). To review fork contributions, pass a PAT with `pull-requests: write` (or repo scope) via `repo-api-token`:
 
 ```yaml
         with:
