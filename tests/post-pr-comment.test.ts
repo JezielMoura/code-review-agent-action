@@ -48,6 +48,19 @@ describe('postPrComment tool', () => {
     expect(result).toEqual({ output: { status: 'success' } });
   });
 
+  it('anexa um signal de timeout à requisição', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(''));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await postPrComment.run({
+      ...runContext,
+      data: { body: 'x' },
+    } as never);
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect(init.signal).toBeInstanceOf(AbortSignal);
+  });
+
   it('propaga erro de requisição falha', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse('nope', false, 500)));
 

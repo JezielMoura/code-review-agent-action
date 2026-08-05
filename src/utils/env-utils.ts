@@ -11,7 +11,7 @@ export function requirePrNumber(): number {
   const raw = requireEnv('PR_NUMBER');
   const pr = Number.parseInt(raw, 10);
   if (!Number.isInteger(pr) || pr <= 0) {
-    throw new Error(`_PR_NUMBER inválido: "${raw}"`);
+    throw new Error(`PR_NUMBER inválido: "${raw}"`);
   }
   return pr;
 }
