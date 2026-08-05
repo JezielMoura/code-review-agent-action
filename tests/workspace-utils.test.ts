@@ -41,6 +41,6 @@ describe('getWorkspacePath', () => {
   it('lança erro quando WORKSPACE_PATH não é um diretório', () => {
     tempDir = mkdtempSync(join(tmpdir(), 'ws-test-'));
     process.env.WORKSPACE_PATH = join(tempDir, 'nao-existe');
-    expect(() => getWorkspacePath()).toThrow(/WORKSPACE_PATH não é um diretório válido/);
+    expect(() => getWorkspacePath()).toThrow(/WORKSPACE_PATH is not a valid directory/);
   });
 });
