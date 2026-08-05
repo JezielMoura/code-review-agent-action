@@ -17,13 +17,13 @@ afterEach(() => {
 });
 
 describe('getWorkspacePath', () => {
-  it('usa WORKSPACE_PATH quando definido (caminho absoluto)', () => {
+  it('uses WORKSPACE_PATH when defined (absolute path)', () => {
     tempDir = mkdtempSync(join(tmpdir(), 'ws-test-'));
     process.env.WORKSPACE_PATH = tempDir;
     expect(getWorkspacePath()).toBe(tempDir);
   });
 
-  it('resolve WORKSPACE_PATH relativo contra o cwd', () => {
+  it('resolves a relative WORKSPACE_PATH against cwd', () => {
     tempDir = mkdtempSync(join(tmpdir(), 'ws-test-'));
     const target = join(tempDir, 'repos', 'app');
     mkdirSync(target, { recursive: true });
@@ -32,15 +32,15 @@ describe('getWorkspacePath', () => {
     expect(getWorkspacePath()).toBe(target);
   });
 
-  it('cai para o cwd quando WORKSPACE_PATH não está definido', () => {
+  it('falls back to cwd when WORKSPACE_PATH is not set', () => {
     delete process.env.WORKSPACE_PATH;
     const cwd = process.cwd();
     expect(getWorkspacePath()).toBe(cwd);
   });
 
-  it('lança erro quando WORKSPACE_PATH não é um diretório', () => {
+  it('throws when WORKSPACE_PATH is not a directory', () => {
     tempDir = mkdtempSync(join(tmpdir(), 'ws-test-'));
-    process.env.WORKSPACE_PATH = join(tempDir, 'nao-existe');
+    process.env.WORKSPACE_PATH = join(tempDir, 'does-not-exist');
     expect(() => getWorkspacePath()).toThrow(/WORKSPACE_PATH is not a valid directory/);
   });
 });

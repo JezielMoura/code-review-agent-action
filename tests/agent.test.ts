@@ -11,7 +11,7 @@ beforeAll(async () => {
 });
 
 describe('agent module', () => {
-  it('carrega sem erros e exporta o agente', () => {
+  it('loads without errors and exports the agent', () => {
     expect(typeof CodeReviewer).toBe('function');
   });
 });

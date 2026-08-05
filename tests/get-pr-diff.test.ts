@@ -70,7 +70,7 @@ afterEach(() => {
 });
 
 describe('loadFilteredDiff', () => {
-  it('calcula o diff localmente via git diff (merge-base vs head)', async () => {
+  it('computes the diff locally via git diff (merge-base vs head)', async () => {
     const diff = await loadFilteredDiff(42);
 
     expect(diff).toContain('diff --git a/src/App.ts b/src/App.ts');
@@ -78,7 +78,7 @@ describe('loadFilteredDiff', () => {
     expect(diff).toContain('+const x = 2;');
   });
 
-  it('mantém apenas os arquivos que casam com os padrões', async () => {
+  it('keeps only files matching the patterns', async () => {
     const diff = await loadFilteredDiff(43);
 
     expect(diff).toContain('src/App.ts');
@@ -86,14 +86,14 @@ describe('loadFilteredDiff', () => {
     expect(diff).not.toContain('print(');
   });
 
-  it('retorna diff vazio quando nenhum arquivo relevante foi alterado', async () => {
+  it('returns empty diff when no relevant file changed', async () => {
     vi.stubEnv('FILE_PATTERNS', '**/*.cs');
 
     const diff = await loadFilteredDiff(44);
     expect(diff).toBe('');
   });
 
-  it('detecta renames e usa o caminho novo no filtro de padrões', async () => {
+  it('detects renames and uses the new path in pattern filtering', async () => {
     repo.git(['checkout', 'main']);
     repo.git(['branch', '-D', 'feature']);
     repo.git(['checkout', '-b', 'feature']);
@@ -107,7 +107,7 @@ describe('loadFilteredDiff', () => {
     expect(diff).not.toContain('main.py');
   });
 
-  it('mantém arquivos com nomes não-ASCII (caminhos citados pelo git)', async () => {
+  it('keeps files with non-ASCII names (git-quoted paths)', async () => {
     repo.git(['checkout', 'main']);
     repo.git(['branch', '-D', 'feature']);
     repo.git(['checkout', '-b', 'feature']);
@@ -120,7 +120,7 @@ describe('loadFilteredDiff', () => {
     expect(diff).toContain('café');
   });
 
-  it('mantém arquivos cujo caminho contém a sequência " b/"', async () => {
+  it('keeps files whose path contains the " b/" sequence', async () => {
     repo.git(['checkout', 'main']);
     repo.git(['branch', '-D', 'feature']);
     repo.git(['checkout', '-b', 'feature']);
@@ -132,7 +132,7 @@ describe('loadFilteredDiff', () => {
     expect(diff).toContain('a b/c.ts');
   });
 
-  it('mantém arquivos deletados no diff filtrado', async () => {
+  it('keeps deleted files in the filtered diff', async () => {
     repo.git(['checkout', 'main']);
     repo.git(['branch', '-D', 'feature']);
     repo.git(['checkout', '-b', 'feature']);
@@ -144,7 +144,7 @@ describe('loadFilteredDiff', () => {
     expect(diff).toContain('-const x = 1;');
   });
 
-  it('trunca o diff respeitando o limite de tamanho', async () => {
+  it('truncates the diff respecting the size limit', async () => {
     vi.stubEnv('MAX_DIFF_SIZE', '60');
 
     const diff = await loadFilteredDiff(46);
@@ -152,33 +152,33 @@ describe('loadFilteredDiff', () => {
     expect(diff).toContain('diff truncated at size limit: 60 characters');
   });
 
-  it('rejeita MAX_DIFF_SIZE inválido', async () => {
+  it('rejects invalid MAX_DIFF_SIZE', async () => {
     vi.stubEnv('MAX_DIFF_SIZE', 'abc');
 
     await expect(loadFilteredDiff(47)).rejects.toThrow(/MAX_DIFF_SIZE/);
   });
 
-  it('rejeita MAX_DIFF_SIZE com sufixo não numérico', async () => {
+  it('rejects MAX_DIFF_SIZE with non-numeric suffix', async () => {
     vi.stubEnv('MAX_DIFF_SIZE', '60px');
 
     await expect(loadFilteredDiff(53)).rejects.toThrow(/MAX_DIFF_SIZE/);
   });
 
-  it('rejeita falta de BASE_REF', async () => {
+  it('rejects missing BASE_REF', async () => {
     vi.stubEnv('BASE_REF', '');
 
     await expect(loadFilteredDiff(48)).rejects.toThrow(/BASE_REF/);
   });
 
-  it('falha com mensagem clara quando o ref base não existe', async () => {
-    vi.stubEnv('BASE_REF', 'nao-existe');
+  it('fails with a clear message when the base ref does not exist', async () => {
+    vi.stubEnv('BASE_REF', 'does-not-exist');
 
-    await expect(loadFilteredDiff(49)).rejects.toThrow(/git diff falhou/);
+    await expect(loadFilteredDiff(49)).rejects.toThrow(/git diff failed/);
   });
 });
 
 describe('getPrDiff tool', () => {
-  it('usa o número do PR vindo do ambiente (não do modelo)', async () => {
+  it('uses the PR number from the environment (not from the model)', async () => {
     vi.stubEnv('PR_NUMBER', '100');
 
     const result = await getPrDiff.run(runContext as never);
