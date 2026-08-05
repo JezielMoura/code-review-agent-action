@@ -14,7 +14,7 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - uses: JezielMoura/code-review-agent-action@86d95db5af3ee53c621577e1474491da0b3d4ce3
+      - uses: JezielMoura/code-review-agent-action@b7c799b29e6c53f839056e5c5c04d6bb7f1b8a74
         with:
           openai-api-url: ${{ secrets.OPENAI_API_URL }}
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
