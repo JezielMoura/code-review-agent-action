@@ -98,8 +98,8 @@ describe('loadFilteredDiff', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(TS_DIFF)));
 
     const diff = await loadFilteredDiff(44);
-    expect(diff.length).toBeLessThanOrEqual(60 + '[diff truncado por limite de tamanho: 60 caracteres]'.length + 2);
-    expect(diff).toContain('diff truncado por limite de tamanho: 60 caracteres');
+    expect(diff.length).toBeLessThanOrEqual(60 + '[diff truncated at size limit: 60 characters]'.length + 2);
+    expect(diff).toContain('diff truncated at size limit: 60 characters');
   });
 
   it('rejeita MAX_DIFF_SIZE inválido', async () => {
