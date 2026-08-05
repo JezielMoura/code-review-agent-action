@@ -61,6 +61,21 @@ describe('matchesPatternList (negation)', () => {
   });
 });
 
+describe('matchesAnyGlob edge cases', () => {
+  it('matches any path with a bare double-star', () => {
+    expect(matchesAnyGlob('src/a.ts', ['**'])).toBe(true);
+    expect(matchesAnyGlob('anything/at/all.ts', ['**'])).toBe(true);
+  });
+
+  it('does not match the directory itself with a trailing globstar', () => {
+    expect(matchesAnyGlob('src', ['src/**'])).toBe(false);
+  });
+
+  it('is case-sensitive', () => {
+    expect(matchesAnyGlob('Src/a.ts', ['src/**/*.ts'])).toBe(false);
+  });
+});
+
 describe('filterDiffByPatterns', () => {
   const diff = [
     'diff --git a/src/Program.cs b/src/Program.cs',
