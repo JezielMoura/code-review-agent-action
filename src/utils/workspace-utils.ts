@@ -9,7 +9,7 @@ export function getWorkspacePath(): string {
       : resolve(process.cwd(), raw)
     : process.cwd();
 
-  if (!existsSync(workspace) || !statSync(workspace).isDirectory()) {
+  if (!existsSync(workspace) || statSync(workspace).isFile()) {
     throw new Error(`WORKSPACE_PATH não é um diretório válido: "${workspace}"`);
   }
 

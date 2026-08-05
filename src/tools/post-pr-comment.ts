@@ -13,7 +13,7 @@ export const postPrComment = defineTool({
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ body: data.body }),
+      body: JSON.stringify({ content: data.body }),
     });
     return { output: { status: 'success' } };
   },

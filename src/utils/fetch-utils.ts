@@ -8,7 +8,6 @@ export async function sendRequest(path: string, options: RequestInit = {}): Prom
   const res = await fetch(url, {
     ...options,
     headers: {
-      ...options.headers,
       Authorization: `token ${apiToken}`,
     },
   });

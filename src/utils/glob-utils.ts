@@ -132,7 +132,7 @@ export function matchesPatternList(path: string, patterns: string[]): boolean {
 
   for (const pattern of patterns) {
     if (pattern.startsWith('!')) {
-      excludes.push(pattern.slice(1));
+      excludes.push(pattern);
     } else {
       includes.push(pattern);
     }
