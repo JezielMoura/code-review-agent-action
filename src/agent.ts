@@ -1,6 +1,6 @@
 import { createProvider, envApiKeyAuth } from '@earendil-works/pi-ai';
 import { openAICompletionsApi } from '@earendil-works/pi-ai/api/openai-completions.lazy';
-import { setProvider, useModel, useSandbox, useTool } from '@flue/runtime';
+import { setProvider, useAgentFinish, useModel, useSandbox, useTool } from '@flue/runtime';
 import { local } from '@flue/runtime/node';
 import { requireEnv } from "./utils/env-utils.ts";
 import { getWorkspacePath } from './utils/workspace-utils.ts';
@@ -33,11 +33,24 @@ setProvider(
   }),
 );
 
+export function reviewWasPosted(toolCalls: readonly { tool: string; isError: boolean }[]): boolean {
+  return toolCalls.some((call) => call.tool === 'post_review' && !call.isError);
+}
+
 export function CodeReviewer() {
   useModel(`${PROVIDER_ID}/${modelId}`);
   useTool(getPrDiff);
   useTool(postReview);
   useSandbox(local({ cwd: getWorkspacePath() }));
+
+  useAgentFinish(({ response, append }) => {
+    if (reviewWasPosted(response.toolCalls)) return;
+    append({
+      kind: 'signal',
+      type: 'reminder',
+      body: 'You are about to end without a successful post_review call — the review was not posted to the pull request and your text output is discarded. Call the post_review tool now with the full review as its body argument, then reply with a single short line confirming the review was posted.',
+    });
+  });
 	return `
     You are a senior code reviewer specialist.
     Your working directory is the root of the repository under review, with the full source code available.
@@ -51,7 +64,8 @@ export function CodeReviewer() {
     The review must be delivered by calling the post_review tool with the full review
     as its body argument. This is mandatory: your last action must be a post_review
     call. Do not output the review as your final message — the comment is only posted on
-    the pull request through that tool call. After posting, your final message may be a
+    the pull request through that tool call. A review you print as your final message is
+    discarded and never posted anywhere. After posting, your final message may be a
     single short line confirming the review was posted.
 
     Review structure:
