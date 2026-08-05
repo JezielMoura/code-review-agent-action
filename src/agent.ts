@@ -46,8 +46,15 @@ export function CodeReviewer() {
     code (definitions, callers, tests, existing patterns, AGENTS.md) before
     concluding — the diff alone doesn't always reveal impact, security, and consistency.
 
-    If the provided diff has content, produce an objective review in Markdown, in English, and
-    generate a comment using post_pr_comment with the structure below:
+    If the provided diff has content, produce an objective review in Markdown, in English.
+
+    The review must be delivered by calling the post_pr_comment tool with the full review
+    as its body argument. This is mandatory: your last action must be a post_pr_comment
+    call. Do not output the review as your final message — the comment is only posted on
+    the pull request through that tool call. After posting, your final message may be a
+    single short line confirming the review was posted.
+
+    Review structure (the post_pr_comment body must follow it):
 
     ## Review
 
@@ -66,6 +73,7 @@ export function CodeReviewer() {
 
     If you don't find any relevant issues, say so explicitly instead of inventing
     trivial observations. Be direct, technical, and avoid beating around the bush.
-    If the diff is empty, respond with "No changes detected in the pull request." and do not generate a comment.
+    If the diff is empty, respond with "No changes detected in the pull request." and do
+    not call post_pr_comment.
   `;
 }
