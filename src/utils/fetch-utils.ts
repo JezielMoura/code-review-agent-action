@@ -14,7 +14,7 @@ export async function sendRequest(path: string, options: RequestInit = {}): Prom
   });
 
   if (!res.ok) {
-    throw new Error(`Falha na requisição (${res.status}): ${await res.text()}`);
+    throw new Error(`Error in request ${url} (${res.status}): ${await res.text()}`);
   }
 
   return res.text();
