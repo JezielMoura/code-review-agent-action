@@ -34,28 +34,28 @@ describe('matchesAnyGlob', () => {
     ['src/a/x.ts', ['src/[ab]/x.ts'], true],
   ];
 
-  it.each(cases)('caso: %s ~ %j => %s', (path, patterns, expected) => {
+  it.each(cases)('case: %s ~ %j => %s', (path, patterns, expected) => {
     expect(matchesAnyGlob(path, patterns)).toBe(expected);
   });
 });
 
-describe('matchesPatternList (negação)', () => {
-  it('exclui arquivos cobertos por um padrão negado', () => {
+describe('matchesPatternList (negation)', () => {
+  it('excludes files covered by a negated pattern', () => {
     expect(matchesPatternList('src/Foo.cs', ['**/*.cs', '!**/*.min.cs'])).toBe(true);
     expect(matchesPatternList('src/Foo.min.cs', ['**/*.cs', '!**/*.min.cs'])).toBe(false);
   });
 
-  it('exige pelo menos um padrão positivo', () => {
+  it('requires at least one positive pattern', () => {
     expect(matchesPatternList('src/Foo.cs', ['!**/*.min.cs'])).toBe(false);
     expect(matchesPatternList('a.min.js', ['!**/*.min.js'])).toBe(false);
   });
 
-  it('aplica negação junto de padrões positivos múltiplos', () => {
+  it('applies negation alongside multiple positive patterns', () => {
     expect(matchesPatternList('src/App.tsx', ['**/*.{ts,tsx}', '!**/*.spec.tsx'])).toBe(true);
     expect(matchesPatternList('src/App.spec.tsx', ['**/*.{ts,tsx}', '!**/*.spec.tsx'])).toBe(false);
   });
 
-  it('negação com subdiretórios', () => {
+  it('negation with subdirectories', () => {
     expect(matchesPatternList('src/generated/models.ts', ['**/*.ts', '!src/generated/**'])).toBe(false);
     expect(matchesPatternList('src/hand/models.ts', ['**/*.ts', '!src/generated/**'])).toBe(true);
   });
@@ -88,24 +88,24 @@ describe('filterDiffByPatterns', () => {
     '+  "version": "1.0.1"',
   ].join('\n');
 
-  it('mantém apenas os arquivos que casam com os padrões', () => {
+  it('keeps only the files that match the patterns', () => {
     const result = filterDiffByPatterns(diff, ['**/*.cs']);
     expect(result).toContain('src/Program.cs');
     expect(result).toContain('src/Foo.min.cs');
     expect(result).not.toContain('package.json');
   });
 
-  it('aplica padrões de exclusão', () => {
+  it('applies exclusion patterns', () => {
     const result = filterDiffByPatterns(diff, ['**/*.cs', '!**/*.min.cs']);
     expect(result).toContain('src/Program.cs');
     expect(result).not.toContain('src/Foo.min.cs');
   });
 
-  it('retorna string vazia quando nenhum arquivo casa', () => {
+  it('returns empty string when no file matches', () => {
     expect(filterDiffByPatterns(diff, ['**/*.py'])).toBe('');
   });
 
-  it('retorna string vazia quando só existem padrões negados', () => {
+  it('returns empty string when only negated patterns exist', () => {
     expect(filterDiffByPatterns(diff, ['!**/*.cs'])).toBe('');
   });
 });

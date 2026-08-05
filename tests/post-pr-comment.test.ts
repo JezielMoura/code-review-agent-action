@@ -24,7 +24,7 @@ describe('postPrComment tool', () => {
     vi.unstubAllGlobals();
   });
 
-  it('posta o comentário no endpoint de issues do PR com o token correto', async () => {
+  it('posts the comment to the PR issues endpoint with the correct token', async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(''));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -48,7 +48,7 @@ describe('postPrComment tool', () => {
     expect(result).toEqual({ output: { status: 'success' } });
   });
 
-  it('propaga erro de requisição falha', async () => {
+  it('propagates failed request errors', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse('nope', false, 500)));
 
     await expect(

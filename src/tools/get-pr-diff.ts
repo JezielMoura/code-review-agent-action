@@ -60,7 +60,7 @@ async function gitPrDiff(): Promise<string> {
   } catch (err) {
     const stderr = (err as { stderr?: unknown }).stderr?.toString() ?? '';
     const detail = stderr.trim() ? `: ${stderr.trim()}` : '';
-    throw new Error(`git diff falhou em "${workspace}" (${baseRef}...HEAD)${detail}`);
+    throw new Error(`git diff failed in "${workspace}" (${baseRef}...HEAD)${detail}`);
   }
 }
 
@@ -68,7 +68,7 @@ function parseMaxDiffSize(): number {
   const raw = requireEnv('MAX_DIFF_SIZE');
   const parsed = Number(raw);
   if (!Number.isInteger(parsed) || parsed <= 0) {
-    throw new Error(`MAX_DIFF_SIZE inválido: "${raw}"`);
+    throw new Error(`MAX_DIFF_SIZE is invalid: "${raw}"`);
   }
   return parsed;
 }
