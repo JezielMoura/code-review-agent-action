@@ -64,8 +64,8 @@ async function gitPrDiff(): Promise<string> {
 
 function parseMaxDiffSize(): number {
   const raw = requireEnv('MAX_DIFF_SIZE');
-  const parsed = Number.parseInt(raw, 10);
-  if (!Number.isFinite(parsed) || parsed <= 0) {
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
     throw new Error(`MAX_DIFF_SIZE inválido: "${raw}"`);
   }
   return parsed;

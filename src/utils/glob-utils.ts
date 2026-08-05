@@ -14,25 +14,112 @@ function splitDiffByFile(diff: string): DiffFileBlock[] {
   const blocks: DiffFileBlock[] = [];
   let current: string[] = [];
   let currentPath = '';
+  let inHunk = false;
+
+  const pushBlock = () => {
+    if (current.length > 0) {
+      blocks.push({ path: currentPath, content: current.join('\n') });
+    }
+  };
 
   for (const line of lines) {
     if (line.startsWith('diff --git ')) {
-      if (current.length > 0) {
-        blocks.push({ path: currentPath, content: current.join('\n') });
-      }
+      pushBlock();
       current = [line];
-      const match = line.match(/^diff --git a\/(.+?) b\/(.+)$/);
-      currentPath = match ? match[2] : '';
+      // Fallback for blocks without ---/+++ headers (binary files, pure renames).
+      currentPath = parseDiffGitPath(line);
+      inHunk = false;
     } else {
       current.push(line);
+      if (inHunk) continue;
+      if (line.startsWith('@@')) {
+        inHunk = true;
+        continue;
+      }
+      const path = parseHeaderPath(line);
+      if (path) currentPath = path;
     }
   }
 
-  if (current.length > 0) {
-    blocks.push({ path: currentPath, content: current.join('\n') });
-  }
-
+  pushBlock();
   return blocks;
+}
+
+/**
+ * Extract the changed path from a `---`/`+++` header line, which is the
+ * authoritative source for the file path (the `diff --git` line can be
+ * ambiguous for paths containing spaces or ` b/`). Handles git's C-style
+ * quoting of unusual paths (e.g. non-ASCII names) and the trailing tab git
+ * appends to paths containing spaces.
+ */
+function parseHeaderPath(line: string): string {
+  const trimmed = line.replace(/\t$/, '');
+  if (trimmed.startsWith('+++ ')) {
+    if (trimmed === '+++ /dev/null') return '';
+    return stripSidePrefix(trimmed.slice('+++ '.length), 'b');
+  }
+  if (trimmed.startsWith('--- ')) {
+    if (trimmed === '--- /dev/null') return '';
+    return stripSidePrefix(trimmed.slice('--- '.length), 'a');
+  }
+  return '';
+}
+
+function stripSidePrefix(path: string, side: 'a' | 'b'): string {
+  const quoted = path.startsWith('"') && path.endsWith('"');
+  const inner = quoted ? path.slice(1, -1) : path;
+  if (!inner.startsWith(`${side}/`)) return '';
+  return unquoteGitPath(inner.slice(side.length + 1));
+}
+
+/**
+ * Parse the b/ (new) path from a `diff --git` line, anchoring at the end of
+ * the line so paths containing ` b/` or spaces parse correctly.
+ */
+function parseDiffGitPath(line: string): string {
+  const match = line.match(/^diff --git (.*) (?:\")?b\/(.+?)(?:\")?$/);
+  if (!match) return '';
+  return unquoteGitPath(match[2]);
+}
+
+/** Unescape git's C-style path quoting (octal bytes, \\n, \\t, \\" etc.). */
+function unquoteGitPath(path: string): string {
+  if (!path.includes('\\')) return path;
+  const bytes: number[] = [];
+  const escapes: Record<string, number> = {
+    '\\': 0x5c,
+    '"': 0x22,
+    n: 0x0a,
+    t: 0x09,
+    r: 0x0d,
+    a: 0x07,
+    b: 0x08,
+    f: 0x0c,
+    v: 0x0b,
+  };
+  for (let i = 0; i < path.length; i++) {
+    const ch = path[i];
+    if (ch !== '\\') {
+      bytes.push(ch.codePointAt(0)!);
+      continue;
+    }
+    const next = path[i + 1];
+    if (next !== undefined && next >= '0' && next <= '7') {
+      let octal = next;
+      let j = i + 2;
+      while (octal.length < 3 && j < path.length && path[j] >= '0' && path[j] <= '7') {
+        octal += path[j];
+        j++;
+      }
+      bytes.push(Number.parseInt(octal, 8));
+      i = j - 1;
+    } else {
+      const code = escapes[next ?? ''];
+      if (code !== undefined) bytes.push(code);
+      i += 1;
+    }
+  }
+  return Buffer.from(bytes).toString('utf8');
 }
 
 function escapeRegExp(ch: string): string {

@@ -107,6 +107,43 @@ describe('loadFilteredDiff', () => {
     expect(diff).not.toContain('main.py');
   });
 
+  it('mantém arquivos com nomes não-ASCII (caminhos citados pelo git)', async () => {
+    repo.git(['checkout', 'main']);
+    repo.git(['branch', '-D', 'feature']);
+    repo.git(['checkout', '-b', 'feature']);
+    repo.write('src/Café.ts', 'const café = 1;\n');
+    repo.git(['add', '.']);
+    repo.git(['commit', '-m', 'accented']);
+
+    const diff = await loadFilteredDiff(50);
+    expect(diff).not.toBe('');
+    expect(diff).toContain('café');
+  });
+
+  it('mantém arquivos cujo caminho contém a sequência " b/"', async () => {
+    repo.git(['checkout', 'main']);
+    repo.git(['branch', '-D', 'feature']);
+    repo.git(['checkout', '-b', 'feature']);
+    repo.write('a b/c.ts', 'x = 1;\n');
+    repo.git(['add', '.']);
+    repo.git(['commit', '-m', 'space']);
+
+    const diff = await loadFilteredDiff(51);
+    expect(diff).toContain('a b/c.ts');
+  });
+
+  it('mantém arquivos deletados no diff filtrado', async () => {
+    repo.git(['checkout', 'main']);
+    repo.git(['branch', '-D', 'feature']);
+    repo.git(['checkout', '-b', 'feature']);
+    repo.git(['rm', 'src/App.ts']);
+    repo.git(['commit', '-m', 'delete']);
+
+    const diff = await loadFilteredDiff(52);
+    expect(diff).toContain('diff --git a/src/App.ts b/src/App.ts');
+    expect(diff).toContain('-const x = 1;');
+  });
+
   it('trunca o diff respeitando o limite de tamanho', async () => {
     vi.stubEnv('MAX_DIFF_SIZE', '60');
 
@@ -119,6 +156,12 @@ describe('loadFilteredDiff', () => {
     vi.stubEnv('MAX_DIFF_SIZE', 'abc');
 
     await expect(loadFilteredDiff(47)).rejects.toThrow(/MAX_DIFF_SIZE/);
+  });
+
+  it('rejeita MAX_DIFF_SIZE com sufixo não numérico', async () => {
+    vi.stubEnv('MAX_DIFF_SIZE', '60px');
+
+    await expect(loadFilteredDiff(53)).rejects.toThrow(/MAX_DIFF_SIZE/);
   });
 
   it('rejeita falta de BASE_REF', async () => {
