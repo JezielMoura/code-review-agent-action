@@ -13,11 +13,16 @@ inputs:
     description: 'Nome do modelo a ser usado na chamada (ex: gpt-4o-mini)'
     required: true
   repo-api-url:
-    description: 'URL base da API do Forgejo (ex: https://forge.exemplo.com/api/v1)'
-    required: true
+    description: 'URL base da API do repositório (ex: https://api.github.com ou https://forge.exemplo.com/api/v1)'
+    required: false
+    default: 'https://api.github.com'
   repo-api-token:
-    description: 'Token com permissão de escrita no repositório (para ler o diff e postar comentário)'
-    required: true
+    description: 'Token com permissão de escrita no repositório (para ler o diff e postar comentário). Padrão: github.token no GitHub.'
+    required: false
+  repo-api-kind:
+    description: 'Tipo da API do repositório: github (padrão) ou forgejo'
+    required: false
+    default: 'github'
   file-patterns:
     description: 'Padrões glob (separados por vírgula) dos arquivos a revisar. Prefixe um padrão com ! para excluir (ex: **/*.ts,!**/*.spec.ts)'
     required: false
@@ -25,7 +30,7 @@ inputs:
   max-diff-size:
     description: 'Tamanho máximo (em caracteres) do diff enviado ao LLM'
     required: false
-    default: '60000'
+    default: '300000'
 
 runs:
   using: 'composite'
@@ -50,7 +55,8 @@ runs:
       run: ./node_modules/.bin/flue run src/agent.ts --message "Review pr ${{ github.event.pull_request.number }}"
       env:
         REPO_API_URL: ${{ inputs.repo-api-url }}
-        REPO_API_TOKEN: ${{ inputs.repo-api-token }}
+        REPO_API_TOKEN: ${{ inputs.repo-api-token || github.token }}
+        REPO_API_KIND: ${{ inputs.repo-api-kind }}
         REPO: ${{ github.repository }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
         FILE_PATTERNS: ${{ inputs.file-patterns }}

@@ -14,7 +14,11 @@ export async function loadFilteredDiff(prNumber: number): Promise<string> {
     .map((p) => p.trim())
     .filter(Boolean);
 
-  const rawDiff = await sendRequest(`pulls/${prNumber}.diff`);
+  const rawDiff = repoApiKind() === 'github'
+    ? await sendRequest(`pulls/${prNumber}`, {
+        headers: { Accept: 'application/vnd.github.v3.diff' },
+      })
+    : await sendRequest(`pulls/${prNumber}.diff`);
   const filteredDiff = filterDiffByPatterns(rawDiff, filePatterns);
 
   if (!filteredDiff.trim()) {
@@ -29,6 +33,14 @@ export async function loadFilteredDiff(prNumber: number): Promise<string> {
 
   diffCache.set(prNumber, truncatedDiff);
   return truncatedDiff;
+}
+
+function repoApiKind(): 'github' | 'forgejo' {
+  const kind = process.env.REPO_API_KIND ?? 'github';
+  if (kind !== 'github' && kind !== 'forgejo') {
+    throw new Error(`REPO_API_KIND inválido: "${kind}" (esperado "github" ou "forgejo")`);
+  }
+  return kind;
 }
 
 function parseMaxDiffSize(): number {

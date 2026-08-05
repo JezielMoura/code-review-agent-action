@@ -46,7 +46,7 @@ describe('loadFilteredDiff', () => {
     vi.unstubAllGlobals();
   });
 
-  it('busca o diff no endpoint correto de pull requests', async () => {
+  it('busca o diff no endpoint correto de pull requests (github)', async () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(TS_DIFF));
     vi.stubGlobal('fetch', fetchMock);
 
@@ -54,12 +54,36 @@ describe('loadFilteredDiff', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://forge.example/api/v1/repos/org/repo/pulls/42.diff',
+      'https://forge.example/api/v1/repos/org/repo/pulls/42',
       expect.objectContaining({
-        headers: expect.objectContaining({ Authorization: 'token token123' }),
+        headers: expect.objectContaining({
+          Authorization: 'token token123',
+          Accept: 'application/vnd.github.v3.diff',
+        }),
       }),
     );
     expect(diff).toContain('src/App.ts');
+  });
+
+  it('busca o diff com sufixo .diff quando repo-api-kind é forgejo', async () => {
+    vi.stubEnv('REPO_API_KIND', 'forgejo');
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(TS_DIFF));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const diff = await loadFilteredDiff(46);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      'https://forge.example/api/v1/repos/org/repo/pulls/46.diff',
+      expect.anything(),
+    );
+    expect(diff).toContain('src/App.ts');
+  });
+
+  it('rejeita REPO_API_KIND inválido', async () => {
+    vi.stubEnv('REPO_API_KIND', 'gitlab');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse(TS_DIFF)));
+
+    await expect(loadFilteredDiff(47)).rejects.toThrow(/REPO_API_KIND/);
   });
 
   it('retorna diff vazio quando nenhum arquivo relevante foi alterado', async () => {
@@ -108,7 +132,7 @@ describe('getPrDiff tool', () => {
     const result = await getPrDiff.run(runContext as never);
 
     expect(fetchMock).toHaveBeenCalledWith(
-      'https://forge.example/api/v1/repos/org/repo/pulls/100.diff',
+      'https://forge.example/api/v1/repos/org/repo/pulls/100',
       expect.anything(),
     );
     expect(result).toEqual({ output: { diff: expect.stringContaining('src/App.ts') } });
